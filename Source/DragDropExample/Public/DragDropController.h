@@ -56,6 +56,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* RightClickAction;
 
+	// Cancel placement action
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* CancelPlacementAction;
+
     UPROPERTY(EditAnywhere, Category = "Camera")
     float PanSpeed;
 
@@ -85,5 +89,10 @@ protected:
 	APlaceableMesh* CurrentPlaceableMesh;
 
 public:
+
+    UFUNCTION(BlueprintCallable, Category = "Placement")
     void SetActorPlacement(APlaceableMesh* PlaceableMesh);
+
+    UFUNCTION(BlueprintCallable, Category = "Placement")
+	void CancelActorPlacement();
 };

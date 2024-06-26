@@ -68,6 +68,8 @@ void ADragDropController::SetupInputComponent()
     if (Input != nullptr) {
         Input->BindAction(ZoomInAction, ETriggerEvent::Triggered, this, &ADragDropController::ZoomIn);
         Input->BindAction(ZoomOutAction, ETriggerEvent::Triggered, this, &ADragDropController::ZoomOut);
+
+		Input->BindAction(CancelPlacementAction, ETriggerEvent::Triggered, this, &ADragDropController::CancelActorPlacement);
     }
 }
 
@@ -129,4 +131,9 @@ void ADragDropController::SetActorPlacement(APlaceableMesh* PlaceableMesh)
         CurrentPlaceableMesh = PlaceableMesh;
         bShowMouseCursor = false;
     }
+}
+
+void ADragDropController::CancelActorPlacement()
+{
+	SetActorPlacement(nullptr);
 }
