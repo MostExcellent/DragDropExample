@@ -109,12 +109,12 @@ void ADragDropController::ZoomCamera(float DeltaSeconds)
 
 void ADragDropController::ZoomIn()
 {
-    TargetZoomAmount += ZoomSpeed; // Feel free to change this
+    TargetZoomAmount += ZoomSpeed;
 }
 
 void ADragDropController::ZoomOut()
 {
-    TargetZoomAmount -= ZoomSpeed; // Feel free to change this
+    TargetZoomAmount -= ZoomSpeed;
 }
 
 void ADragDropController::SetActorPlacement(APlaceableMesh* PlaceableMesh)
