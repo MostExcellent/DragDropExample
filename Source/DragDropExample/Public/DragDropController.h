@@ -60,6 +60,10 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputAction* CancelPlacementAction;
 
+    // Select Placeable One
+	UPROPERTY(EditAnywhere, Category = "Input")
+	UInputAction* SelectPlaceableOneAction;
+
     UPROPERTY(EditAnywhere, Category = "Camera")
     float PanSpeed;
 
@@ -88,6 +92,10 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category = "Placement")
 	APlaceableMesh* CurrentPlaceableMesh;
 
+	// Array of placeable meshes
+	UPROPERTY(EditAnywhere, Category = "Placement")
+	TArray<TSubclassOf<APlaceableMesh>> PlaceableMeshes;
+
 public:
 
     UFUNCTION(BlueprintCallable, Category = "Placement")
@@ -95,4 +103,16 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Placement")
 	void CancelActorPlacement();
+
+protected:
+
+    FCollisionQueryParams GetPlaceableTraceParams();
+
+	void ProjectPlaceableMesh();
+
+    void SelectPlaceableOne();
+
+	void LeftClick();
+	void RightClick();
+
 };
