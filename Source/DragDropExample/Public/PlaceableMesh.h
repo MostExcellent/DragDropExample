@@ -11,31 +11,21 @@ UCLASS()
 class DRAGDROPEXAMPLE_API APlaceableMesh : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
+
+public:
 	APlaceableMesh();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-protected:
-
-	// The mesh component for this placeable mesh.
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh")
+private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* MeshComponent;
 
-	// Maximum angle from vertical on which this actor can be placed.
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Placement")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Placement", meta = (AllowPrivateAccess = "true"))
 	float MaxPlacementAngle;
 
-	// Last position of the placeable mesh, used for when the linetrace misses or hits an invalid placement location.
-	UPROPERTY(BlueprintReadWrite, Category="Position")
+	UPROPERTY(BlueprintReadOnly, Category = "Position", meta = (AllowPrivateAccess = "true"))
 	FVector LastPosition;
-
 };

@@ -25,28 +25,22 @@ void ADragDropController::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Spawn and possess the Camera Pawn
     if (IsLocalController())
     {
         CameraPawn = GetWorld()->SpawnActor<ACameraPawn>();
         Possess(CameraPawn);
 
-        // Set initial camera location
         FVector InitialCameraLocation = FVector(0.0f, 0.0f, 2500.0f);
         FRotator InitialCameraRotation = FRotator(-45.0f, 0.0f, 0.0f);
         CameraPawn->SetActorLocation(InitialCameraLocation);
         CameraPawn->SetActorRotation(InitialCameraRotation);
     }
 
-    TargetZoomAmount = 0.0f;
-
-    // Clamp edge pan margin in case the designer did something silly
     EdgePanMargin = FMath::Clamp(EdgePanMargin, 0.0f, 50.0f);
 
-    // Check input mapping context
-    if (InputMappingContext != nullptr)
+    if (InputMappingContext)
     {
-        UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(this->GetLocalPlayer());
+        UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
         Subsystem->AddMappingContext(InputMappingContext, 0);
     }
     else
@@ -54,7 +48,6 @@ void ADragDropController::BeginPlay()
         UE_LOG(LogTemp, Error, TEXT("The map context is not set"));
     }
 
-    // Enable Cursor
     bShowMouseCursor = true;
 }
 
@@ -62,16 +55,13 @@ void ADragDropController::SetupInputComponent()
 {
     Super::SetupInputComponent();
 
-    UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(InputComponent);
-
-    // Setup input actions
-    if (Input != nullptr) {
+    if (UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(InputComponent))
+    {
         Input->BindAction(ZoomInAction, ETriggerEvent::Triggered, this, &ADragDropController::ZoomIn);
         Input->BindAction(ZoomOutAction, ETriggerEvent::Triggered, this, &ADragDropController::ZoomOut);
         Input->BindAction(SelectPlaceableOneAction, ETriggerEvent::Triggered, this, &ADragDropController::SelectPlaceableOne);
-		Input->BindAction(LeftClickAction, ETriggerEvent::Triggered, this, &ADragDropController::LeftClick);
-
-		Input->BindAction(CancelPlacementAction, ETriggerEvent::Triggered, this, &ADragDropController::CancelActorPlacement);
+        Input->BindAction(LeftClickAction, ETriggerEvent::Triggered, this, &ADragDropController::LeftClick);
+        Input->BindAction(CancelPlacementAction, ETriggerEvent::Triggered, this, &ADragDropController::CancelActorPlacement);
     }
 }
 
@@ -81,12 +71,12 @@ void ADragDropController::Tick(float DeltaSeconds)
 
     PanCamera(DeltaSeconds);
     ZoomCamera(DeltaSeconds);
-	ProjectPlaceableMesh();
+    ProjectPlaceableMesh();
 }
 
 void ADragDropController::PanCamera(float DeltaSeconds)
 {
-    if (bIsInPlacementMode || CameraPawn == nullptr)
+    if (bIsInPlacementMode || !CameraPawn)
     {
         return;
     }
@@ -102,7 +92,7 @@ void ADragDropController::PanCamera(float DeltaSeconds)
 
 void ADragDropController::ZoomCamera(float DeltaSeconds)
 {
-    if (CameraPawn == nullptr)
+    if (!CameraPawn)
     {
         return;
     }
@@ -122,12 +112,12 @@ void ADragDropController::ZoomOut()
 
 void ADragDropController::SetActorPlacement(APlaceableMesh* PlaceableMesh)
 {
-    if (PlaceableMesh == nullptr)
+    if (!PlaceableMesh)
     {
-		if (bIsInPlacementMode && CurrentPlaceableMesh != nullptr)
-		{
-			CurrentPlaceableMesh->Destroy();
-		}
+        if (bIsInPlacementMode && CurrentPlaceableMesh)
+        {
+            CurrentPlaceableMesh->Destroy();
+        }
         bIsInPlacementMode = false;
         CurrentPlaceableMesh = nullptr;
         bShowMouseCursor = true;
@@ -146,67 +136,67 @@ void ADragDropController::SetActorPlacement(APlaceableMesh* PlaceableMesh)
 
 void ADragDropController::CancelActorPlacement()
 {
-	if (CurrentPlaceableMesh != nullptr)
+    if (CurrentPlaceableMesh)
     {
-		CurrentPlaceableMesh->Destroy();
-	}
-	SetActorPlacement(nullptr);
+        CurrentPlaceableMesh->Destroy();
+    }
+    SetActorPlacement(nullptr);
 }
 
-FCollisionQueryParams ADragDropController::GetPlaceableTraceParams()
+FCollisionQueryParams ADragDropController::GetPlaceableTraceParams() const
 {
     FCollisionQueryParams CollisionParams;
-	CollisionParams.AddIgnoredActor(CurrentPlaceableMesh);
+    CollisionParams.AddIgnoredActor(CurrentPlaceableMesh);
     CollisionParams.AddIgnoredActor(CameraPawn);
-	return CollisionParams;
+    return CollisionParams;
 }
 
 void ADragDropController::ProjectPlaceableMesh()
 {
-	if (CurrentPlaceableMesh == nullptr || !bIsInPlacementMode)
-	{
-		return;
-	}
+    if (!CurrentPlaceableMesh || !bIsInPlacementMode)
+    {
+        return;
+    }
 
-	FVector2D MousePosition;
-	GetMousePosition(MousePosition.X, MousePosition.Y);
+    FVector2D MousePosition;
+    GetMousePosition(MousePosition.X, MousePosition.Y);
 
-	FVector WorldLocation;
-	FVector WorldDirection;
-	DeprojectScreenPositionToWorld(MousePosition.X, MousePosition.Y, WorldLocation, WorldDirection);
+    FVector WorldLocation;
+    FVector WorldDirection;
+    DeprojectScreenPositionToWorld(MousePosition.X, MousePosition.Y, WorldLocation, WorldDirection);
 
-	FHitResult HitResult;
-	FCollisionQueryParams CollisionParams = GetPlaceableTraceParams();
+    FHitResult HitResult;
+    FCollisionQueryParams CollisionParams = GetPlaceableTraceParams();
 
-	if (GetWorld()->LineTraceSingleByChannel(HitResult, WorldLocation, WorldLocation + WorldDirection * 10000.0f, ECollisionChannel::ECC_Visibility, CollisionParams))
-	{
-		CurrentPlaceableMesh->SetActorLocation(HitResult.Location);
-	}
+    if (GetWorld()->LineTraceSingleByChannel(HitResult, WorldLocation, WorldLocation + WorldDirection * 10000.0f, ECollisionChannel::ECC_Visibility, CollisionParams))
+    {
+        CurrentPlaceableMesh->SetActorLocation(HitResult.Location);
+    }
 }
 
 void ADragDropController::SelectPlaceableOne()
 {
-	if (PlaceableMeshes.Num() > 0)
-	{
-		TSubclassOf<APlaceableMesh> PlaceableMesh = PlaceableMeshes[0];
-		APlaceableMesh* NewPlaceableMesh = GetWorld()->SpawnActor<APlaceableMesh>(PlaceableMesh, FVector::ZeroVector, FRotator::ZeroRotator);
-		SetActorPlacement(NewPlaceableMesh);
-	}
+    if (PlaceableMeshes.Num() > 0)
+    {
+        TSubclassOf<APlaceableMesh> PlaceableMesh = PlaceableMeshes[0];
+        APlaceableMesh* NewPlaceableMesh = GetWorld()->SpawnActor<APlaceableMesh>(PlaceableMesh, FVector::ZeroVector, FRotator::ZeroRotator);
+        SetActorPlacement(NewPlaceableMesh);
+    }
 }
 
 void ADragDropController::LeftClick()
 {
-	if (bIsInPlacementMode && CurrentPlaceableMesh != nullptr)
+    if (bIsInPlacementMode && CurrentPlaceableMesh)
     {
-		CurrentPlaceableMesh = nullptr;
-		SetActorPlacement(nullptr);
-	}
+        CurrentPlaceableMesh = nullptr;
+        SetActorPlacement(nullptr);
+    }
 }
 
 void ADragDropController::RightClick()
 {
     if (bIsInPlacementMode)
-	{
-		CancelActorPlacement();
-	}
+    {
+        CancelActorPlacement();
+    }
 }

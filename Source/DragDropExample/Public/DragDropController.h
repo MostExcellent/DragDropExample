@@ -9,9 +9,6 @@
 
 class UInputMappingContext;
 
-/**
- * Player controller for placing actors in the world.
- */
 UCLASS()
 class DRAGDROPEXAMPLE_API ADragDropController : public APlayerController
 {
@@ -27,92 +24,76 @@ protected:
 
 protected:
     void PanCamera(float DeltaSeconds);
-
-	void ZoomCamera(float DeltaSeconds);
+    void ZoomCamera(float DeltaSeconds);
     void ZoomIn();
     void ZoomOut();
 
-protected:
+private:
+    UPROPERTY(BlueprintReadWrite, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+    ACameraPawn* CameraPawn;
 
-    // Camera pawn
-	UPROPERTY(BlueprintReadWrite, Category = "Camera")
-	ACameraPawn* CameraPawn;
+    UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+    UInputMappingContext* InputMappingContext;
 
-    // Input mapping context
-	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputMappingContext* InputMappingContext;
+    UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+    UInputAction* ZoomInAction;
 
-    // Zoom in and out actions
-	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* ZoomInAction;
+    UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+    UInputAction* ZoomOutAction;
 
-	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* ZoomOutAction;
+    UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+    UInputAction* LeftClickAction;
 
-	// Left and right click actions
-	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* LeftClickAction;
+    UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+    UInputAction* RightClickAction;
 
-	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* RightClickAction;
+    UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+    UInputAction* CancelPlacementAction;
 
-	// Cancel placement action
-	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* CancelPlacementAction;
+    UPROPERTY(EditAnywhere, Category = "Input", meta = (AllowPrivateAccess = "true"))
+    UInputAction* SelectPlaceableOneAction;
 
-    // Select Placeable One
-	UPROPERTY(EditAnywhere, Category = "Input")
-	UInputAction* SelectPlaceableOneAction;
+    UPROPERTY(EditAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+    float PanSpeed = 400.0f;
 
-    UPROPERTY(EditAnywhere, Category = "Camera")
-    float PanSpeed;
+    UPROPERTY(EditAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+    float EdgePanMargin = 10.0f;
 
-    // Maybe make this be a percentage of viewport size?
-    UPROPERTY(EditAnywhere, Category = "Camera")
-    float EdgePanMargin;
+    UPROPERTY(EditAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+    float ZoomSpeed = 100.0f;
 
-    UPROPERTY(EditAnywhere, Category = "Camera")
-    float ZoomSpeed;
+    UPROPERTY(EditAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+    float MinZoomDistance = 1000.0f;
 
-    UPROPERTY(EditAnywhere, Category = "Camera")
-    float MinZoomDistance;
+    UPROPERTY(EditAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+    float MaxZoomDistance = 3500.0f;
 
-    UPROPERTY(EditAnywhere, Category = "Camera")
-    float MaxZoomDistance;
+    UPROPERTY(EditAnywhere, Category = "Camera", meta = (AllowPrivateAccess = "true"))
+    float ZoomSmoothSpeed = 0.1f;
 
-    UPROPERTY(EditAnywhere, Category = "Camera")
-    float ZoomSmoothSpeed;
+    float TargetZoomAmount = 0.0f;
+    float CurrentZoomAmount = 0.0f;
 
-    float TargetZoomAmount;
-    float CurrentZoomAmount;
+    UPROPERTY(BlueprintReadOnly, Category = "Placement", meta = (AllowPrivateAccess = "true"))
+    bool bIsInPlacementMode = false;
 
-    UPROPERTY(BlueprintReadOnly, Category = "Placement")
-    bool bIsInPlacementMode;
+    UPROPERTY(BlueprintReadOnly, Category = "Placement", meta = (AllowPrivateAccess = "true"))
+    APlaceableMesh* CurrentPlaceableMesh;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Placement")
-	APlaceableMesh* CurrentPlaceableMesh;
-
-	// Array of placeable meshes
-	UPROPERTY(EditAnywhere, Category = "Placement")
-	TArray<TSubclassOf<APlaceableMesh>> PlaceableMeshes;
+    UPROPERTY(EditAnywhere, Category = "Placement", meta = (AllowPrivateAccess = "true"))
+    TArray<TSubclassOf<APlaceableMesh>> PlaceableMeshes;
 
 public:
-
     UFUNCTION(BlueprintCallable, Category = "Placement")
     void SetActorPlacement(APlaceableMesh* PlaceableMesh);
 
     UFUNCTION(BlueprintCallable, Category = "Placement")
-	void CancelActorPlacement();
+    void CancelActorPlacement();
 
-protected:
-
-    FCollisionQueryParams GetPlaceableTraceParams();
-
-	void ProjectPlaceableMesh();
-
+private:
+    FCollisionQueryParams GetPlaceableTraceParams() const;
+    void ProjectPlaceableMesh();
     void SelectPlaceableOne();
-
-	void LeftClick();
-	void RightClick();
-
+    void LeftClick();
+    void RightClick();
 };
