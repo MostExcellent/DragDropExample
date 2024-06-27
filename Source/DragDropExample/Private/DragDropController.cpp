@@ -74,7 +74,7 @@ void ADragDropController::Tick(float DeltaSeconds)
     ProjectPlaceableMesh();
 }
 
-void ADragDropController::PanCamera(float DeltaSeconds)
+void ADragDropController::PanCamera(float DeltaSeconds) const
 {
     if (bIsInPlacementMode || !CameraPawn)
     {
@@ -151,7 +151,7 @@ FCollisionQueryParams ADragDropController::GetPlaceableTraceParams() const
     return CollisionParams;
 }
 
-void ADragDropController::ProjectPlaceableMesh()
+void ADragDropController::ProjectPlaceableMesh() const
 {
     if (!CurrentPlaceableMesh || !bIsInPlacementMode)
     {

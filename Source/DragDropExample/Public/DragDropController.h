@@ -23,7 +23,7 @@ protected:
     virtual void Tick(float DeltaSeconds) override;
 
 protected:
-    void PanCamera(float DeltaSeconds);
+    void PanCamera(float DeltaSeconds) const;
     void ZoomCamera(float DeltaSeconds);
     void ZoomIn();
     void ZoomOut();
@@ -92,7 +92,7 @@ public:
 
 private:
     FCollisionQueryParams GetPlaceableTraceParams() const;
-    void ProjectPlaceableMesh();
+    void ProjectPlaceableMesh() const;
     void SelectPlaceableOne();
     void LeftClick();
     void RightClick();
