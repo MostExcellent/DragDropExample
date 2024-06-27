@@ -93,6 +93,7 @@ public:
 private:
     FCollisionQueryParams GetPlaceableTraceParams() const;
     void ProjectPlaceableMesh();
+    FVector FindClosestNonOverlappingLocation(const FVector& StartLocation, const FCollisionShape& CollisionShape, const FCollisionQueryParams& CollisionParams);
     void SelectPlaceableOne();
     void LeftClick();
     void RightClick();

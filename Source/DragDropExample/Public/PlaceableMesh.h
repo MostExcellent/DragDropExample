@@ -24,8 +24,12 @@ private:
 	UStaticMeshComponent* MeshComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Placement", meta = (AllowPrivateAccess = "true"))
-	float MaxPlacementAngle;
+	float MaxPlacementAngle = 45.0f;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Position", meta = (AllowPrivateAccess = "true"))
-	FVector LastPosition;
+	FVector LastPosition = FVector::ZeroVector;
+
+public:
+	FORCEINLINE bool CanPlaceAngle(float Angle) const { return Angle <= MaxPlacementAngle; }
+	FORCEINLINE FVector GetLastPosition() const { return LastPosition; }
 };

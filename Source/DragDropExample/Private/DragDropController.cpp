@@ -168,11 +168,67 @@ void ADragDropController::ProjectPlaceableMesh()
     FHitResult HitResult;
     FCollisionQueryParams CollisionParams = GetPlaceableTraceParams();
 
-    if (GetWorld()->LineTraceSingleByChannel(HitResult, WorldLocation, WorldLocation + WorldDirection * 10000.0f, ECollisionChannel::ECC_Visibility, CollisionParams))
+    bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, WorldLocation, WorldLocation + WorldDirection * 10000.0f, ECollisionChannel::ECC_Visibility, CollisionParams);
+
+    if (bHit)
     {
-        CurrentPlaceableMesh->SetActorLocation(HitResult.Location);
+        FVector HitLocation = HitResult.Location;
+        FVector HitNormal = HitResult.Normal;
+
+        // Check if the hit surface normal is within the acceptable angle
+        float DotProduct = FVector::DotProduct(HitNormal, FVector::UpVector);
+        float Angle = FMath::RadiansToDegrees(FMath::Acos(DotProduct));
+
+        if (CurrentPlaceableMesh->CanPlaceAngle(Angle))
+        {
+            // Check for overlap at the intended placement location
+            FCollisionShape CollisionShape = FCollisionShape::MakeBox(CurrentPlaceableMesh->GetComponentsBoundingBox().GetExtent());
+            bool bIsOverlapping = GetWorld()->OverlapAnyTestByChannel(HitLocation, FQuat::Identity, ECC_Pawn, CollisionShape, CollisionParams);
+
+            if (bIsOverlapping)
+            {
+                // Find the closest non-overlapping location
+                FVector NewLocation = FindClosestNonOverlappingLocation(HitLocation, CollisionShape, CollisionParams);
+                CurrentPlaceableMesh->SetActorLocation(NewLocation);
+                //CurrentPlaceableMesh->LastPosition = NewLocation;
+            }
+            else
+            {
+                CurrentPlaceableMesh->SetActorLocation(HitLocation);
+                //CurrentPlaceableMesh->LastPosition = HitLocation;
+            }
+            return;
+        }
     }
+
+    // If the placement is invalid, keep the mesh at its last valid position
+    CurrentPlaceableMesh->SetActorLocation(CurrentPlaceableMesh->GetLastPosition());
 }
+
+FVector ADragDropController::FindClosestNonOverlappingLocation(const FVector& StartLocation, const FCollisionShape& CollisionShape, const FCollisionQueryParams& CollisionParams)
+{
+    const float StepSize = 10.0f; // Step size for each incremental move
+    const int MaxIterations = 100; // Max number of iterations to avoid infinite loops
+    FVector BestLocation = StartLocation;
+
+    for (int i = 0; i < MaxIterations; ++i)
+    {
+        // Check if the current location is valid
+        bool bIsOverlapping = GetWorld()->OverlapAnyTestByChannel(BestLocation, FQuat::Identity, ECC_Pawn, CollisionShape, CollisionParams);
+
+        if (!bIsOverlapping)
+        {
+            return BestLocation;
+        }
+
+        // Move the location slightly in a random direction
+        BestLocation += FVector(FMath::RandRange(-StepSize, StepSize), FMath::RandRange(-StepSize, StepSize), 0);
+    }
+
+    // If no valid location found, return the original location
+    return StartLocation;
+}
+
 
 void ADragDropController::SelectPlaceableOne()
 {
